@@ -5,7 +5,7 @@ export default {
     1: {
       name: "Bot 1",
       videoConfig: {
-        inputVideo: path.resolve(process.cwd(), "dist/assets/input/victoria1.mp4"),
+        inputVideo: path.resolve(process.cwd(), "dist/assets/input/videoToPost.mp4"),
         outputDir: path.resolve(process.cwd(), "dist/assets/output"),
         beepAudio: path.resolve(process.cwd(), "dist/assets/beep.mp3"),
         videoNumber: 2,
