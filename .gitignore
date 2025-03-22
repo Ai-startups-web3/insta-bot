@@ -1,0 +1,5 @@
+.env
+dist/
+node_modules
+assets/input/victoria1.mp4
+assets/beep.mp3
