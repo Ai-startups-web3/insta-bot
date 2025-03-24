@@ -11,7 +11,7 @@ export default {
         inputVideo: path.resolve(process.cwd(), "dist/assets/input/videoToPost.mp4"),
         outputDir: path.resolve(process.cwd(), "dist/assets/output"),
         beepAudio: path.resolve(process.cwd(), "dist/assets/beep.mp3"),
-        videoNumber: 3,
+        videoNumber: 4,
         videoDuration: 30,
         episode: 1,
         accessToken: process.env.cn_btc,
