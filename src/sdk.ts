@@ -48,7 +48,7 @@ const runUploadProcess = async (mediaType: string, botConfig: any, retryCount = 
     console.log("✅ Upload completed successfully");
     botConfig.videoNumber++;
   } catch (error) {
-    console.error(`❌ Error uploading ${mediaType}:`, error);
+    console.error(`❌ Error uploading ${mediaType}:`);
     // if (retryCount < 3) {
     //   console.log(`🔄 Retrying upload (${retryCount + 1}/3)`);
     //   await new Promise(resolve => setTimeout(resolve, 5000));

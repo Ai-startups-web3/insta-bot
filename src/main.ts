@@ -48,7 +48,7 @@ const runUploadProcess = async (mediaType: 'VIDEO' | 'IMAGE', config: any, retry
     // Increment media name for the next upload
     config.videoNumber++;
   } catch (error) {
-    console.error(`Error during ${mediaType} upload process:`);
+    // console.error(`Error during ${mediaType} upload process:`);
 
     // Retry logic
     // if (retryCount < 3) {

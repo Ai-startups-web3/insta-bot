@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { uploadFileToFirebase } from './UrlGenerator.js';
+import { uploadFileToS3 } from './UrlGenerator.js';
 import { fileURLToPath } from 'url';
 import path from 'path';
 
@@ -14,7 +14,7 @@ interface InstagramUserDetails {
 
 // Function to fetch Instagram user details
 const fetchInstagramUserDetails = async (accessToken: string): Promise<InstagramUserDetails> => {
-  const url = 'https://graph.instagram.com/v20.0/me';
+  const url = 'https://graph.instagram.com/v22.0/me';
   try {
     const response = await axios.get(url, {
       params: {
@@ -32,7 +32,7 @@ const fetchInstagramUserDetails = async (accessToken: string): Promise<Instagram
 
     return { igId, igUsername };
   } catch (error) {
-    console.error('Error fetching Instagram user details:');
+    console.error('Error fetching Instagram user details:',error);
     throw error;
   }
 };
@@ -48,7 +48,7 @@ const postInstagramMedia = async (
   thumbOffset = '',
   locationId = ''
 ): Promise<string> => {
-  const url = `https://graph.instagram.com/v20.0/${igId}/media`;
+  const url = `https://graph.instagram.com/v22.0/${igId}/media`;
   try {
     const response = await axios.post(url, {
       media_type: mediaType === 'VIDEO' ? "REELS" : undefined,
@@ -76,7 +76,7 @@ const postInstagramMedia = async (
 
 // Function to publish media
 const publishInstagramMedia = async (igId: string, creationId: string, accessToken: string) => {
-  const url = `https://graph.instagram.com/v20.0/${igId}/media_publish`;
+  const url = `https://graph.instagram.com/v22.0/${igId}/media_publish`;
   try {
     const response = await axios.post(url, null, {
       headers: {
@@ -123,7 +123,7 @@ const startUploadSession = async (
     const filePath = getFilePath(folderName, mediaName, mediaType);
     console.log(filePath);
 
-    const thirdwebFileUrl = await uploadFileToFirebase(filePath,"bot_input","custom_bot");
+    const thirdwebFileUrl = await uploadFileToS3(filePath);
 
     const mediaUrl = thirdwebFileUrl;
 
@@ -133,7 +133,7 @@ const startUploadSession = async (
     const { igId } = await fetchInstagramUserDetails(accessToken);
 
     // Post media and get the creation ID
-    const creationId = await postInstagramMedia(igId, accessToken, mediaUrl, mediaType, caption, coverUrl, thumbOffset, locationId);
+    const creationId =mediaUrl && await postInstagramMedia(igId, accessToken, mediaUrl, mediaType, caption, coverUrl, thumbOffset, locationId);
 
     // Publish the media
     if (creationId) {
@@ -142,7 +142,7 @@ const startUploadSession = async (
       console.error('Failed to obtain creationId, cannot publish media.');
     }
   } catch (error) {
-    console.error('Error in Instagram media workflow:', error);
+    // console.error('Error in Instagram media workflow:', error);
     throw error;
   }
 };

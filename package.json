@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "tsc && cp -r assets dist/",
-    "start": "node dist/sdk.js"
+    "start": "npm run build && node dist/sdk.js"
   },
   "dependencies": {
     "@thirdweb-dev/storage": "^2.0.15",
