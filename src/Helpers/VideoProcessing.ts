@@ -76,10 +76,7 @@ const createSegment = (
     const command = ffmpeg(inputVideo)
       .inputOptions(['-ss', startTime.toString(), '-t', videoDuration.toString()])
       .format('mp4')
-      .videoCodec('libx264')
-      .audioCodec('aac')
-      .audioChannels(2)
-      .audioFrequency(48000)
+      
       .outputOptions([
         '-movflags', 'faststart',
         '-pix_fmt', 'yuv420p',

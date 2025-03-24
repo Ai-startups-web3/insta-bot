@@ -1,10 +1,7 @@
 import axios from 'axios';
 import { uploadFileToS3 } from './UrlGenerator.js';
-import { fileURLToPath } from 'url';
 import path from 'path';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // Type definitions for Instagram user details
 interface InstagramUserDetails {

@@ -1,4 +1,7 @@
 import path from 'path';
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export default {
   bots: {
@@ -8,7 +11,7 @@ export default {
         inputVideo: path.resolve(process.cwd(), "dist/assets/input/videoToPost.mp4"),
         outputDir: path.resolve(process.cwd(), "dist/assets/output"),
         beepAudio: path.resolve(process.cwd(), "dist/assets/beep.mp3"),
-        videoNumber: 2,
+        videoNumber: 3,
         videoDuration: 30,
         episode: 1,
         accessToken: process.env.cn_btc,
@@ -18,6 +21,7 @@ export default {
         isPaused: false,
       }
     },
+   
     // 2: {
     //   name: "Bot 2",
     //   videoConfig: {
