@@ -11,7 +11,7 @@ export default {
         inputVideo: path.resolve(process.cwd(), "dist/assets/input/videoToPost.mp4"),
         outputDir: path.resolve(process.cwd(), "dist/assets/output"),
         beepAudio: path.resolve(process.cwd(), "dist/assets/beep.mp3"),
-        videoNumber: 4,
+        videoNumber: 5,
         videoDuration: 30,
         episode: 1,
         accessToken: process.env.cn_btc,
@@ -21,7 +21,22 @@ export default {
         isPaused: false,
       }
     },
-   
+    2: {
+      name: "Bot 1",
+      videoConfig: {
+        inputVideo: path.resolve(process.cwd(), "dist/assets/input/videoToPost.mp4"),
+        outputDir: path.resolve(process.cwd(), "dist/assets/output"),
+        beepAudio: path.resolve(process.cwd(), "dist/assets/beep.mp3"),
+        videoNumber: 5,
+        videoDuration: 30,
+        episode: 1,
+        accessToken: process.env.samay_btc,
+        caption: "Join Link in bio",
+        hashtags: ["#hashtag1", "#hashtag2"],
+        location: "Location1",
+        isPaused: false,
+      }
+    },
     // 2: {
     //   name: "Bot 2",
     //   videoConfig: {
