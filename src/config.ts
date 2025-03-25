@@ -32,7 +32,7 @@ export default {
         episode: 1,
         accessToken: process.env.samay_btc,
         caption: "Join Link in bio",
-        hashtags: ["#hashtag1", "#hashtag2"],
+        hashtags: ["#cartoon", "#funny", "sinchan", "memes", "childhood"],
         location: "Location1",
         isPaused: false,
       }
