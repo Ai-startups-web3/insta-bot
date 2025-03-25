@@ -76,15 +76,8 @@ const createSegment = (
     const command = ffmpeg(inputVideo)
       .inputOptions(['-ss', startTime.toString(), '-t', videoDuration.toString()])
       .format('mp4')
-      
       .outputOptions([
-        '-movflags', 'faststart',
-        '-pix_fmt', 'yuv420p',
-        '-r', '30',
         `-vf`, `drawtext=text='${text}':fontcolor=white:fontsize=80:box=1:boxcolor=black@0.5:x=(w-text_w)/2:y=50`,
-        '-b:v', '2000k',
-        '-maxrate', '2000k',
-        '-bufsize', '4000k',
         '-b:a', '64k',
       ]);
 
