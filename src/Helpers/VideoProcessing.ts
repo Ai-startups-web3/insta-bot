@@ -74,21 +74,25 @@ const createSegment = (
 
   return new Promise((resolve, reject) => {
     const command = ffmpeg(inputVideo)
-      .inputOptions(['-ss', startTime.toString(), '-t', videoDuration.toString()])
+      .inputOptions([
+        '-ss', startTime.toString(), 
+        '-t', videoDuration.toString()
+      ])
       .format('mp4')
       .outputOptions([
-        `-vf`, `drawtext=text='${text}':fontcolor=white:fontsize=80:box=1:boxcolor=black@0.5:x=(w-text_w)/2:y=50`,
+        `-vf`,
+        `drawtext=text='${text}':fontfile=/usr/share/fonts/dejavu/DejaVuSans-Bold.ttf:fontcolor=white:fontsize=80:box=1:boxcolor=black@0.5:x=(w-text_w)/2:y=50`,
         '-b:a', '64k',
       ]);
-
-    // if (beepAudio) {
-    //   command.input(beepAudio).complexFilter(['[0:a][1:a]amix=inputs=2:duration=shortest']);
-    // }
-
+  
+    // Ensure that the drawtext filter has a valid font path
     command
+      .on('start', (cmd) => {
+        console.log(`FFmpeg command: ${cmd}`);
+      })
       .on('end', () => {
         console.log(`Segment ${videoNumber} created: ${outputFilename}`);
-
+  
         // Check if the previous video exists and delete it
         if (fs.existsSync(previousFilename)) {
           fs.unlink(previousFilename, (err) => {
@@ -99,7 +103,7 @@ const createSegment = (
             }
           });
         }
-
+  
         resolve();
       })
       .on('error', (err: any) => {
@@ -108,4 +112,5 @@ const createSegment = (
       })
       .save(outputFilename);
   });
+  
 };
