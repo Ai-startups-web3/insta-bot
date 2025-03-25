@@ -130,7 +130,7 @@ const startUploadSession = async (
     const { igId } = await fetchInstagramUserDetails(accessToken);
 
     // Post media and get the creation ID
-    const creationId =mediaUrl && await postInstagramMedia(igId, accessToken, mediaUrl, mediaType, caption, coverUrl, thumbOffset, locationId);
+    const creationId =mediaUrl && await postInstagramMedia(igId, accessToken, mediaUrl, mediaType, `${caption} ${hashtags}`, coverUrl, thumbOffset, locationId);
 
     // Publish the media
     if (creationId) {
