@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "tsc && cp -r assets dist/",
-    "start": "npm run build && node --max-old-space-size=4096 dist/sdk.js"
+    "start": "npm run build && node --max-old-space-size=8192 dist/sdk.js"
   },
   "dependencies": {
     "@thirdweb-dev/storage": "^2.0.15",
