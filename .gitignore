@@ -1,6 +1,7 @@
 .env
 dist/
 node_modules
+assets/input
 assets/input/victoria1.mp4
 assets/input/videoToPost.mp4
 assets/beep.mp3
