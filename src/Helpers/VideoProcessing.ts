@@ -80,7 +80,6 @@ const createSegment = (
       ])
       .format('mp4')
       .outputOptions([
-        `-vf`,
         '-b:a', '64k',
       ]);
   
