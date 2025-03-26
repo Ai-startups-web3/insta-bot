@@ -16,7 +16,7 @@ export default {
         episode: 1,
         accessToken: process.env.cn_btc,
         caption: "Video 1 Caption",
-        hashtags: ["#hashtag1", "#hashtag2"],
+        hashtags: ["#cartoon", "#funny", "#sinchan", "#memes", "#childhood"],
         location: "Location1",
         isPaused: false,
       }
@@ -32,7 +32,7 @@ export default {
         episode: 1,
         accessToken: process.env.samay_btc,
         caption: "Join Link in bio",
-        hashtags: ["#cartoon", "#funny", "sinchan", "memes", "childhood"],
+        hashtags: ["#cartoon", "#funny", "#sinchan", "#memes", "#childhood"],
         location: "Location1",
         isPaused: false,
       }
