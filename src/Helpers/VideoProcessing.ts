@@ -80,7 +80,6 @@ const createSegment = (
       ])
       .format('mp4')
       .outputOptions([
-        `-vf`, `drawtext=text='Test':fontcolor=white:fontsize=24:x=10:y=10`,
         '-b:a', '64k',
       ]);
   

@@ -15,7 +15,7 @@ export default {
         videoDuration: 30,
         episode: 1,
         accessToken: process.env.cn_btc,
-        caption: "Video 1 Caption",
+        caption: "Buy crypto. Link in bio",
         hashtags: ["#cartoon", "#funny", "#sinchan", "#memes", "#childhood"],
         location: "Location1",
         isPaused: false,

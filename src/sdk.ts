@@ -54,7 +54,12 @@ const runUploadProcess = async (mediaType: string, botConfig: any, retryCount = 
     );
 
     console.log("🎬 Video Cropped");
-    
+    const currentDate = new Date().toLocaleDateString('en-US', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
     // Upload video
     const coverUrl = "";
     const thumbOffset = "";
@@ -63,7 +68,7 @@ const runUploadProcess = async (mediaType: string, botConfig: any, retryCount = 
       botConfig.outputDir,
       botConfig.videoNumber,
       mediaType="VIDEO",
-      botConfig.caption,
+      `${botConfig.caption}\n\n Video Posted on ${currentDate}\n${botConfig.hashtags}`, 
       botConfig.hashtags,
       coverUrl,
       thumbOffset,
