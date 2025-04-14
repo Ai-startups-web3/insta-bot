@@ -15,8 +15,8 @@ export default {
         videoDuration: 30,
         episode: 1,
         accessToken: process.env.cn_btc,
-        caption: "Buy crypto. Link in bio",
-        hashtags: ["#cartoon", "#funny", "#sinchan", "#memes", "#childhood"],
+        caption: "Buy top crypto. Link in bio",
+        hashtags: ["#cartoon #funny #sinchan #memes #childhood"],
         location: "Location1",
         isPaused: false,
       }
@@ -31,8 +31,8 @@ export default {
         videoDuration: 30,
         episode: 1,
         accessToken: process.env.samay_btc,
-        caption: "Join Link in bio",
-        hashtags: ["#cartoon", "#funny", "#sinchan", "#memes", "#childhood"],
+        caption: "Buy top crypto. Link in bio",
+        hashtags: ["#cartoon #funny #sinchan #memes #childhood"],
         location: "Location1",
         isPaused: false,
       }
