@@ -2,14 +2,15 @@
   "devDependencies": {
     "@types/fluent-ffmpeg": "^2.1.27",
     "@types/node": "^22.13.10",
+    "cross-env": "^7.0.3",
     "dotenv": "^16.4.7",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2"
   },
-"scripts": {
-  "build": "cross-env NODE_OPTIONS=--max-old-space-size=1536 tsc && cp -r assets dist/",
-  "start": "npm run build && node --max-old-space-size=1536 dist/sdk.js"
-},
+  "scripts": {
+    "build": "cross-env NODE_OPTIONS=--max-old-space-size=1536 tsc && cp -r assets dist/",
+    "start": "npm run build && node --max-old-space-size=1536 dist/sdk.js"
+  },
   "dependencies": {
     "@thirdweb-dev/storage": "^2.0.15",
     "aws-sdk": "^2.1692.0",
