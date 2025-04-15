@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@thirdweb-dev/storage": "^2.0.15",
+    "aws-sdk": "^2.1692.0",
     "axios": "^1.8.2",
     "firebase": "^11.4.0",
     "fluent-ffmpeg": "^2.1.3"
