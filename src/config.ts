@@ -25,7 +25,7 @@ export default {
     2: {
       name: "Bot 1",
       videoConfig: {
-        inputVideo: path.resolve(process.cwd(), "dist/assets/input/videoToPost.mp4"),
+        inputVideo: path.resolve(process.cwd(), "dist/assets/input/videoToPost1.mp4"),
         outputDir: path.resolve(process.cwd(), "dist/assets/output"),
         beepAudio: path.resolve(process.cwd(), "dist/assets/beep.mp3"),
         videoNumber: 11,
@@ -41,7 +41,7 @@ export default {
     3: {
       name: "Bot 3",
       videoConfig: {
-        inputVideo: path.resolve(process.cwd(), "dist/assets/input/videoToPost.mp4"),
+        inputVideo: path.resolve(process.cwd(), "dist/assets/input/videoToPost2.mp4"),
         outputDir: path.resolve(process.cwd(), "dist/assets/output"),
         beepAudio: path.resolve(process.cwd(), "dist/assets/beep.mp3"),
         videoNumber: 11,
