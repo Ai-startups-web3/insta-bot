@@ -100,7 +100,7 @@ const getHashtagId = async (accessToken: string, hashtag: string,instagramId:str
       params: {
         user_id: instagramId,
         q: hashtag,
-        access_token: accessToken
+        access_token: process.env.FbAccessToken
 
       }
     });
