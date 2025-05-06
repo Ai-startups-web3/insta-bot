@@ -10,7 +10,7 @@ interface InstagramUserDetails {
 }
 
 // Function to fetch Instagram user details
-const fetchInstagramUserDetails = async (accessToken: string): Promise<InstagramUserDetails> => {
+export const fetchInstagramUserDetails = async (accessToken: string): Promise<InstagramUserDetails> => {
   const url = 'https://graph.instagram.com/v22.0/me';
   try {
     const response = await axios.get(url, {
