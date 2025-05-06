@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import { cropVideo } from './Helpers/VideoProcessing.js';
 import { startUploadSession } from './Helpers/upload.js';
 import config from './config.js';
+import { deleteVideoFromS3, getRandomVideoFromS3 } from './Helpers/UrlGenerator.js';
 
 dotenv.config();
 
@@ -30,12 +31,6 @@ const saveVideoNumber = (videoNumber: number) => {
   }
 };
 
-// Ensure output directory exists
-const ensureOutputDirExists = (outputDir: string) => {
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
-  }
-};
 
 // Handles video upload and retries on failure
 const runUploadProcess = async (mediaType: string, botConfig: any, retryCount = 0) => {
@@ -43,17 +38,7 @@ const runUploadProcess = async (mediaType: string, botConfig: any, retryCount = 
   console.log(`🔄 Upload process started for ${mediaType} | Video Number: ${botConfig.videoNumber}`);
 
   try {
-    // Process the video
-    await cropVideo(
-      botConfig.inputVideo,
-      botConfig.outputDir,
-      botConfig.beepAudio,
-      botConfig.videoNumber,
-      botConfig.videoDuration,
-      botConfig.episode
-    );
 
-    console.log("🎬 Video Cropped");
     const currentDate = new Date().toLocaleDateString('en-US', { 
       weekday: 'long', 
       year: 'numeric', 
@@ -63,25 +48,30 @@ const runUploadProcess = async (mediaType: string, botConfig: any, retryCount = 
     // Upload video
     const coverUrl = "";
     const thumbOffset = "";
+
+    const mediaUrl = await getRandomVideoFromS3();
+
     await startUploadSession(
       botConfig.accessToken,
-      botConfig.outputDir,
-      botConfig.videoNumber,
       mediaType="VIDEO",
       `${botConfig.caption}\n\n Video Posted on ${currentDate}\n${botConfig.hashtags}`, 
-      botConfig.hashtags,
+      mediaUrl,
       coverUrl,
       thumbOffset,
-      botConfig.location
+      botConfig.location,
+      botConfig.hashtags,
     );
+
+    // mediaUrl && await deleteVideoFromS3(mediaUrl);
+
 
     console.log("✅ Upload completed successfully");
 
     // Increment video number and save
     botConfig.videoNumber++;
     saveVideoNumber(botConfig.videoNumber);
-  } catch (error) {
-    console.error(`❌ Error uploading ${mediaType}:`, error);
+  } catch (error:any) {
+    console.error(`❌ Error uploading ${mediaType}:`, error.response.data);
   }
 };
 
@@ -95,8 +85,7 @@ const startBot = async (botId: number) => {
   }
 
   const botConfig = bot.videoConfig;
-  ensureOutputDirExists(botConfig.inputVideo);
-  ensureOutputDirExists(botConfig.outputDir);
+
   console.log(`🚀 Starting ${bot.name} | Video Number: ${loadVideoNumber()}`);
 
   await runUploadProcess("VIDEO", botConfig);
