@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { uploadFileToS3 } from './UrlGenerator.js';
+import { deleteVideoFromS3, getRandomVideoFromS3, uploadFileToS3 } from './UrlGenerator.js';
 import path from 'path';
 
 
@@ -92,40 +92,20 @@ const publishInstagramMedia = async (igId: string, creationId: string, accessTok
   }
 };
 
-// Function to get file path for both reels (videos) and photos (images)
-const getFilePath = (folderName: string, mediaName: string, mediaType: 'VIDEO' | 'IMAGE'): string => {
-  const extension = mediaType === 'VIDEO' ? '.mp4' : '.png';
-  return path.join(`${folderName}/${mediaName}${extension}`);
-};
-
-// Function to get file URL for media
-const getFileUrl = (mediaName: string, folderName: string, mediaType: 'VIDEO' | 'IMAGE', serverUrl: string): string => {
-  const extension = mediaType === 'VIDEO' ? '.mp4' : '.png';
-  return `${serverUrl}/media/${folderName}/${mediaName}${extension}`;
-};
-
 // Upload session handler
 const startUploadSession = async (
   accessToken: string,
-  folderName: string,
-  mediaName: string,
   mediaType: 'VIDEO' | 'IMAGE',
   caption = '',
-  hashtags?: string[],
+  mediaUrl:any,
   coverUrl = '',
   thumbOffset = '',
-  locationId = ''
+  locationId = '',
+  hashtags?: string[],
 ) => {
   try {
-    const filePath = getFilePath(folderName, mediaName, mediaType);
-    console.log(filePath);
-
-    const thirdwebFileUrl = await uploadFileToS3(filePath);
-
-    const mediaUrl = thirdwebFileUrl;
-
-    console.log("mediaUrl", mediaUrl);
-
+    console.log(mediaUrl,"mediaUrl");
+    
     // Fetch Instagram user details to get igId
     const { igId } = await fetchInstagramUserDetails(accessToken);
 
@@ -135,6 +115,7 @@ const startUploadSession = async (
     // Publish the media
     if (creationId) {
       await tryPublishInstagramMedia(igId, creationId, accessToken);
+
     } else {
       console.error('Failed to obtain creationId, cannot publish media.');
     }
