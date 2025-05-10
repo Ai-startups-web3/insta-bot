@@ -2,16 +2,6 @@ import ffmpeg from 'fluent-ffmpeg';
 import fs from 'fs';
 import path from 'path';
 
-// Define types for function parameters
-type CropVideoParams = {
-  inputVideo: string;
-  outputDir: string;
-  beepAudio?: string;
-  videoNumber: number;
-  videoDuration: number;
-  episode: number;
-};
-
 // Function to crop video into segments
 export const cropVideo = async (
   inputVideo: string,
@@ -20,6 +10,7 @@ export const cropVideo = async (
   videoNumber: number,
   videoDuration: number,
   episode: number,
+  textOnVideo?: string
 ): Promise<void> => {
   const startTime = videoNumber * videoDuration;
 
@@ -43,7 +34,7 @@ export const cropVideo = async (
         return;
       }
 
-      createSegment(startTime, inputVideo, outputDir, beepAudio, videoNumber, videoDuration, episode)
+      createSegment(startTime, inputVideo, outputDir, beepAudio, videoNumber, videoDuration, episode,textOnVideo)
         .then(() => {
           console.log('Video segment created.');
           resolve();
@@ -64,7 +55,8 @@ const createSegment = (
   beepAudio: string,
   videoNumber: number,
   videoDuration: number,
-  episode: number
+  episode: number,
+  textOnVideo?: string,
 ): Promise<void> => {
   const segmentEndTime = startTime + videoDuration;
   const outputFilename = path.join(outputDir, `${videoNumber}.mp4`);
@@ -80,9 +72,10 @@ const createSegment = (
       ])
       .format('mp4')
       .outputOptions([
+        `-vf`, `drawtext=text='${textOnVideo ? textOnVideo : "World Tours"}':fontcolor=white:fontsize=80:box=1:boxcolor=black@0.5:boxborderw=20:x=(w-text_w)/2:y=50`,
         '-b:a', '64k',
-      ]);
-  
+    ]);
+    
     // Ensure that the drawtext filter has a valid font path
     command
       .on('start', (cmd) => {

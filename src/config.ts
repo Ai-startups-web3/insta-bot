@@ -16,10 +16,11 @@ export default {
         videoDuration: 30,
         episode: 1,
         accessToken: process.env.samsara_world_trips,
-        caption: "Earn free travel. Join link in bio #travel #travelphotography #photography #nature #love #travelgram #photooftheday #adventure #instagram #wanderlust #explore #travelblogger #vacation #instatravel #beautiful #naturephotography #photo #trip #summer #traveling #travelling #beach #holiday ",
+        caption: "Want free travel? Follow @samsara_adventures_official Join link in bio #travel #travelphotography #photography #nature #love #travelgram #photooftheday #adventure #instagram #wanderlust #explore #travelblogger #vacation #instatravel #beautiful #naturephotography #photo #trip #summer #traveling #travelling #beach #holiday ",
         hashtags: ["#childhood"],
         location: "Location1",
         isPaused: false,
+        textOnVideo: "World Best Travel Places",
       }
     },
     2: {
@@ -32,10 +33,11 @@ export default {
         videoDuration: 30,
         episode: 1,
         accessToken: process.env.samsara_world_trips1,
-        caption: "Earn free travel. Join link in bio #travel #travelphotography #photography #nature #love #travelgram #photooftheday #adventure #instagram #wanderlust #explore #travelblogger #vacation #instatravel #beautiful #naturephotography #photo #trip #summer #traveling #travelling #beach #holiday ",
+        caption: "Want free travel? Follow @samsara_adventures_official Join link in bio #travel #travelphotography #photography #nature #love #travelgram #photooftheday #adventure #instagram #wanderlust #explore #travelblogger #vacation #instatravel #beautiful #naturephotography #photo #trip #summer #traveling #travelling #beach #holiday ",
         hashtags: ["#childhood"],
         location: "Location1",
         isPaused: false,
+        textOnVideo: "World Best Travel Places",
       }
     },
     3: {
@@ -48,10 +50,11 @@ export default {
         videoDuration: 30,
         episode: 1,
         accessToken: process.env.samsara_world_trips2,
-        caption: "Earn free travel. Join link in bio #travel #travelphotography #photography #nature #love #travelgram #photooftheday #adventure #instagram #wanderlust #explore #travelblogger #vacation #instatravel #beautiful #naturephotography #photo #trip #summer #traveling #travelling #beach #holiday ",
+        caption: "Earn free travel.  Follow @samsara_adventures_official Join link in bio #travel #travelphotography #photography #nature #love #travelgram #photooftheday #adventure #instagram #wanderlust #explore #travelblogger #vacation #instatravel #beautiful #naturephotography #photo #trip #summer #traveling #travelling #beach #holiday ",
         hashtags: ["#childhood"],
         location: "Location1",
         isPaused: false,
+        textOnVideo: "World Best Travel Places In 4k",
       }
     },
     // 2: {

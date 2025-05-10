@@ -50,7 +50,8 @@ const runUploadProcess = async (mediaType: string, botConfig: any, retryCount = 
       botConfig.beepAudio,
       botConfig.videoNumber,
       botConfig.videoDuration,
-      botConfig.episode
+      botConfig.episode,
+      botConfig.textOnVideo
     );
 
     console.log("🎬 Video Cropped");
