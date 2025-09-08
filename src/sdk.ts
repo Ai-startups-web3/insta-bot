@@ -1,125 +1,46 @@
-import fs from 'fs';
-import dotenv from 'dotenv';
-import { cropVideo } from './Helpers/VideoProcessing.js';
-import { startUploadSession } from './Helpers/upload.js';
-import config from './config.js';
+import { linkedInAccounts } from "./config.js";
+import { getVideoAndTextForAccount } from "./Helpers/Aigenerator.js";
+import { postTextForAccount, uploadImageForAccount } from "./Helpers/VideoProcessing.js";
 
-dotenv.config();
-
-const VIDEO_NUMBER_FILE = './videoNumber.json';
-
-// Load video number from file
-const loadVideoNumber = (): number => {
+async function getAuthorUrn(accessToken: string): Promise<string> {
   try {
-    if (fs.existsSync(VIDEO_NUMBER_FILE)) {
-      const data = fs.readFileSync(VIDEO_NUMBER_FILE, 'utf-8');
-      return JSON.parse(data).videoNumber || 1;
-    }
-  } catch (error) {
-    console.error("⚠ Error loading video number:", error);
-  }
-  return 1; // Default value
-};
-
-// Save video number to file
-const saveVideoNumber = (videoNumber: number) => {
-  try {
-    fs.writeFileSync(VIDEO_NUMBER_FILE, JSON.stringify({ videoNumber }, null, 2), 'utf-8');
-  } catch (error) {
-    console.error("⚠ Error saving video number:", error);
-  }
-};
-
-// Ensure output directory exists
-const ensureOutputDirExists = (outputDir: string) => {
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
-  }
-};
-
-// Handles video upload and retries on failure
-const runUploadProcess = async (mediaType: string, botConfig: any, retryCount = 0) => {
-  botConfig.videoNumber = loadVideoNumber(); // Load before upload
-  console.log(`🔄 Upload process started for ${mediaType} | Video Number: ${botConfig.videoNumber}`);
-
-  try {
-    // Process the video
-    await cropVideo(
-      botConfig.inputVideo,
-      botConfig.outputDir,
-      botConfig.beepAudio,
-      botConfig.videoNumber,
-      botConfig.videoDuration,
-      botConfig.episode
-    );
-
-    console.log("🎬 Video Cropped");
-    const currentDate = new Date().toLocaleDateString('en-US', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    const response = await fetch("https://api.linkedin.com/v2/userinfo", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
     });
-    // Upload video
-    const coverUrl = "";
-    const thumbOffset = "";
-    await startUploadSession(
-      botConfig.accessToken,
-      botConfig.outputDir,
-      botConfig.videoNumber,
-      mediaType="VIDEO",
-      `${botConfig.caption}\n\n Video Posted on ${currentDate}\n${botConfig.hashtags}`, 
-      botConfig.hashtags,
-      coverUrl,
-      thumbOffset,
-      botConfig.location
-    );
 
-    console.log("✅ Upload completed successfully");
-
-    // Increment video number and save
-    botConfig.videoNumber++;
-    saveVideoNumber(botConfig.videoNumber);
-  } catch (error) {
-    console.error(`❌ Error uploading ${mediaType}:`, error);
-  }
-};
-
-// Starts the bot's scheduled uploads
-const startBot = async (botId: number) => {
-  const bot = config.bots[botId as keyof typeof config.bots];
-
-  if (!bot) {
-    console.error(`⚠️ Bot ${botId} not found in config.`);
-    return;
-  }
-
-  const botConfig = bot.videoConfig;
-  ensureOutputDirExists(botConfig.inputVideo);
-  ensureOutputDirExists(botConfig.outputDir);
-  console.log(`🚀 Starting ${bot.name} | Video Number: ${loadVideoNumber()}`);
-
-  await runUploadProcess("VIDEO", botConfig);
-
-  if (botConfig.isPaused) {
-    console.log("⏸ Bot is paused. Skipping scheduled upload.");
-    return;
-  }
-
-  setInterval(async () => {
-    if (botConfig.isPaused) {
-      console.log("⏸ Bot is still paused. Skipping upload.");
-      return;
+    if (!response.ok) {
+      throw new Error(`LinkedIn API error: ${response.status} ${response.statusText}`);
     }
-    console.log("⏳ Running scheduled upload...");
-    await runUploadProcess("VIDEO", botConfig);
-  }, 2 * 60 * 60 * 1000); // Every 2 hours
-};
 
-// Start selected bots based on CLI arguments
-const selectedBots = process.argv.slice(2).map(Number);
-if (selectedBots.length === 0) {
-  console.log("⚡ No specific bots selected. Running all bots...");
+    const data = await response.json() as { sub: string };
+    return `urn:li:person:${data.sub}`;
+  } catch (err) {
+    console.error("Error fetching LinkedIn URN:", err);
+    return "";
+  }
 }
 
-(selectedBots.length ? selectedBots : Object.keys(config.bots).map(Number)).forEach(startBot);
+export async function uploadVideosForAllAccounts() {
+  for (const [accountName, account] of Object.entries(linkedInAccounts)) {
+    console.log(`\n---- Processing ${accountName} ----`);
+
+    // Fetch the latest author URN dynamically
+    let authorUrn = account.authorUrn;
+    if (!authorUrn) {
+      authorUrn = await getAuthorUrn(account.accessToken);
+      if (!authorUrn) {
+        console.warn(`Skipping ${accountName}: could not fetch author URN.`);
+        continue;
+      }
+      account.authorUrn = authorUrn; // update config for future runs
+    }
+
+    // Pass both accountName and courseName to generate content
+    const { postText,mediaPath } = await getVideoAndTextForAccount(accountName, account.courseName);
+
+    await uploadImageForAccount(accountName, account.accessToken, authorUrn,mediaPath || "", postText);
+  }
+}

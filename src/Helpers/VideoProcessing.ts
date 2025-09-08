@@ -1,114 +1,232 @@
-import ffmpeg from 'fluent-ffmpeg';
-import fs from 'fs';
-import path from 'path';
+import axios from "axios";
+import fs from "fs";
 
-// Define types for function parameters
-type CropVideoParams = {
-  inputVideo: string;
-  outputDir: string;
-  beepAudio?: string;
-  videoNumber: number;
-  videoDuration: number;
-  episode: number;
-};
+const LINKEDIN_API_BASE = "https://api.linkedin.com/v2";
 
-// Function to crop video into segments
-export const cropVideo = async (
-  inputVideo: string,
-  outputDir: string,
-  beepAudio: string,
-  videoNumber: number,
-  videoDuration: number,
-  episode: number,
-): Promise<void> => {
-  const startTime = videoNumber * videoDuration;
-
-  console.log("startTime", startTime);
-  
-  // Get the total duration of the input video
-  return new Promise((resolve, reject) => {
-    ffmpeg.ffprobe(inputVideo, (err, metadata) => {
-      if (err) {
-        console.error('Error getting video metadata:', err);
-        reject(err);
-        return;
-      }
-
-      const durationInSeconds = metadata.format.duration;
-      
-      // Ensure the crop does not exceed video length
-      if (durationInSeconds && startTime >= durationInSeconds) {
-        console.error('Total crop time exceeds video duration.');
-        reject('Total crop time exceeds video duration.');
-        return;
-      }
-
-      createSegment(startTime, inputVideo, outputDir, beepAudio, videoNumber, videoDuration, episode)
-        .then(() => {
-          console.log('Video segment created.');
-          resolve();
-        })
-        .catch((err) => {
-          console.error('Error during video cropping:', err);
-          reject(err);
-        });
-    });
-  });
-};
-
-// Function to create a video segment
-const createSegment = (
-  startTime: number,
-  inputVideo: string,
-  outputDir: string,
-  beepAudio: string,
-  videoNumber: number,
-  videoDuration: number,
-  episode: number
-): Promise<void> => {
-  const segmentEndTime = startTime + videoDuration;
-  const outputFilename = path.join(outputDir, `${videoNumber}.mp4`);
-  const previousFilename = path.join(outputDir, `${videoNumber - 1}.mp4`);
-
-  const text = `Ep ${episode} Part ${videoNumber}`;
-
-  return new Promise((resolve, reject) => {
-    const command = ffmpeg(inputVideo)
-      .inputOptions([
-        '-ss', startTime.toString(), 
-        '-t', videoDuration.toString()
-      ])
-      .format('mp4')
-      .outputOptions([
-        '-b:a', '64k',
-      ]);
-  
-    // Ensure that the drawtext filter has a valid font path
-    command
-      .on('start', (cmd) => {
-        console.log(`FFmpeg command: ${cmd}`);
-      })
-      .on('end', () => {
-        console.log(`Segment ${videoNumber} created: ${outputFilename}`);
-  
-        // Check if the previous video exists and delete it
-        if (fs.existsSync(previousFilename)) {
-          fs.unlink(previousFilename, (err) => {
-            if (err) {
-              console.error(`Error deleting file ${previousFilename}:`, err);
-            } else {
-              console.log(`Deleted previous video: ${previousFilename}`);
+export async function uploadVideoForAccount(
+  accountName: string,
+  accessToken: string,
+  authorUrn: string,
+  videoPath: string,
+  postText: string
+) {
+  try {
+    // Step 1: Register the video upload
+    const registerResponse = await axios.post(
+      `${LINKEDIN_API_BASE}/assets?action=registerUpload`,
+      {
+        registerUploadRequest: {
+          recipes: ["urn:li:digitalmediaRecipe:feedshare-video"],
+          owner: authorUrn,
+          serviceRelationships: [
+            {
+              relationshipType: "OWNER",
+              identifier: "urn:li:userGeneratedContent"
             }
-          });
+          ]
         }
-  
-        resolve();
-      })
-      .on('error', (err: any) => {
-        console.error(`Error creating segment ${videoNumber}:`, err);
-        reject(err);
-      })
-      .save(outputFilename);
-  });
-  
-};
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+          "X-Restli-Protocol-Version": "2.0.0"
+        }
+      }
+    );
+
+    const uploadUrl =
+      registerResponse.data.value.uploadMechanism[
+        "com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest"
+      ].uploadUrl;
+    const asset = registerResponse.data.value.asset;
+
+    console.log(`[${accountName}] Upload URL: ${uploadUrl}`);
+    console.log(`[${accountName}] Asset URN: ${asset}`);
+
+    // Step 2: Upload the video
+    const videoStream = fs.createReadStream(videoPath);
+    await axios.put(uploadUrl, videoStream, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/octet-stream"
+      }
+    });
+
+    console.log(`[${accountName}] Video uploaded successfully.`);
+
+    // Step 3: Create the LinkedIn Post
+    const postResponse = await axios.post(
+      `${LINKEDIN_API_BASE}/ugcPosts`,
+      {
+        author: authorUrn,
+        lifecycleState: "PUBLISHED",
+        specificContent: {
+          "com.linkedin.ugc.ShareContent": {
+            shareCommentary: {
+              text: postText
+            },
+            shareMediaCategory: "VIDEO",
+            media: [
+              {
+                status: "READY",
+                media: asset,
+                title: {
+                  text: "Uploaded Video"
+                }
+              }
+            ]
+          }
+        },
+        visibility: {
+          "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"
+        }
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+          "X-Restli-Protocol-Version": "2.0.0"
+        }
+      }
+    );
+
+    console.log(`[${accountName}] Post created successfully:`, postResponse.data);
+  } catch (error: any) {
+    console.error(`[${accountName}] Error:`, error.response?.data || error.message);
+  }
+}
+
+export async function postTextForAccount(
+  accountName: string,
+  accessToken: string,
+  authorUrn: string,
+  postText: string
+) {
+  try {
+    const postResponse = await axios.post(
+      `${LINKEDIN_API_BASE}/ugcPosts`,
+      {
+        author: authorUrn,
+        lifecycleState: "PUBLISHED",
+        specificContent: {
+          "com.linkedin.ugc.ShareContent": {
+            shareCommentary: {
+              text: postText
+            },
+            shareMediaCategory: "NONE" // No media for text-only post
+          }
+        },
+        visibility: {
+          "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"
+        }
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+          "X-Restli-Protocol-Version": "2.0.0"
+        }
+      }
+    );
+
+    console.log(`[${accountName}] Text post created successfully:`, postResponse.data);
+  } catch (error: any) {
+    console.error(`[${accountName}] Error:`, error.response?.data || error.message);
+  }
+}
+
+
+export async function uploadImageForAccount(
+  accountName: string,
+  accessToken: string,
+  authorUrn: string,
+  mediaPath: string,
+  postText: string
+) {
+  try {
+    // ✅ Step 1: Register image upload
+    const registerResponse = await axios.post(
+      `${LINKEDIN_API_BASE}/assets?action=registerUpload`,
+      {
+        registerUploadRequest: {
+          recipes: ["urn:li:digitalmediaRecipe:feedshare-image"], // For images
+          owner: authorUrn,
+          serviceRelationships: [
+            {
+              relationshipType: "OWNER",
+              identifier: "urn:li:userGeneratedContent"
+            }
+          ]
+        }
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+          "X-Restli-Protocol-Version": "2.0.0"
+        }
+      }
+    );
+
+    const uploadUrl =
+      registerResponse.data.value.uploadMechanism[
+        "com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest"
+      ].uploadUrl;
+    const asset = registerResponse.data.value.asset;
+
+    console.log(`[${accountName}] Upload URL: ${uploadUrl}`);
+    console.log(`[${accountName}] Asset URN: ${asset}`);
+
+    // ✅ Step 2: Upload the image
+    const imageStream = fs.createReadStream(mediaPath);
+    await axios.put(uploadUrl, imageStream, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "image/jpeg" // or "image/png"
+      }
+    });
+
+    console.log(`[${accountName}] Image uploaded successfully.`);
+
+    // ✅ Step 3: Create a LinkedIn Post with Image
+    const postResponse = await axios.post(
+      `${LINKEDIN_API_BASE}/ugcPosts`,
+      {
+        author: authorUrn,
+        lifecycleState: "PUBLISHED",
+        specificContent: {
+          "com.linkedin.ugc.ShareContent": {
+            shareCommentary: {
+              text: postText
+            },
+            shareMediaCategory: "IMAGE",
+            media: [
+              {
+                status: "READY",
+                media: asset,
+                title: {
+                  text: "Uploaded Image"
+                }
+              }
+            ]
+          }
+        },
+        visibility: {
+          "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"
+        }
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+          "X-Restli-Protocol-Version": "2.0.0"
+        }
+      }
+    );
+
+    console.log(`[${accountName}] Image post created successfully:`, postResponse.data);
+  } catch (error: any) {
+    console.error(`[${accountName}] Error:`, error.response?.data || error.message);
+  }
+}

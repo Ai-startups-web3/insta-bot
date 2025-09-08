@@ -1,22 +1,21 @@
 {
   "devDependencies": {
-    "@types/fluent-ffmpeg": "^2.1.27",
     "@types/node": "^22.13.10",
     "cross-env": "^7.0.3",
-    "dotenv": "^16.4.7",
+    "dotenv": "^16.6.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "tsc && cp -r assets dist/",
-    "start": "npm run build && node dist/sdk.js"
+    "build": "tsc",
+    "start": "npm run build && node dist/cronJob.js"
   },
   "dependencies": {
-    "@thirdweb-dev/storage": "^2.0.15",
+    "@google/genai": "^1.17.0",
     "aws-sdk": "^2.1692.0",
     "axios": "^1.8.2",
-    "firebase": "^11.4.0",
-    "fluent-ffmpeg": "^2.1.3"
+    "node-cron": "^4.2.1",
+    "node-fetch": "^3.3.2"
   },
   "type": "module",
   "name": "bots",
