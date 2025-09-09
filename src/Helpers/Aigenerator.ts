@@ -9,7 +9,7 @@ const ai = new GoogleGenAI({
 
 export async function getVideoAndTextForAccount(
   accountName: string,
-  courseName: string
+  courseName: string,
 ) {
   try {
     // Save files in current working directory
