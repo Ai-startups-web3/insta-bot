@@ -95,7 +95,7 @@ const startBot = async (botId: number) => {
   setInterval(async () => {
     console.log("⏳ Running scheduled upload...");
     await runUploadProcess("VIDEO", botConfig);
-  }, 2 * 60 * 60 * 1000); // Every 2 hours
+  }, 4 * 60 * 60 * 1000); // Every 2 hours
 };
 
 // Start selected bots based on CLI arguments

@@ -13,7 +13,7 @@ export default {
         accessToken: process.env.samsara_world_trips,
         caption: "Want free travel? Join link in bio  ",
         hashtags: ["#funny", "#meme", "#comedy", "#lol", "#viral", "#dankmemes", "#laugh", "#funnymemes", "#relatable", "#humor", "#trending", "#hilarious","#fyp", "#rofl", "#epicfail", "#jokes", "#dailyfunny", "#memeoftheday", "#haha", "#entertainment"],
-        subreddit: "comedy",
+        subreddit: "funny",
       }
     },
   }
