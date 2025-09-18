@@ -23,7 +23,7 @@ export const linkedInAccounts: Record<string, LinkedInAccount> = {
   account3: {
     accessToken: process.env.LINKEDIN_TOKEN_ACCOUNT3 || "",
     authorUrn: process.env.LINKEDIN_AUTHOR_URN_ACCOUNT3 || "",
-    courseName: "Reactjs"
+    courseName: "Reactjs For advanced Developers"
   },
   account4: {
     accessToken: process.env.LINKEDIN_TOKEN_ACCOUNT4 || "",
@@ -48,7 +48,7 @@ export const linkedInAccounts: Record<string, LinkedInAccount> = {
   account8: {
     accessToken: process.env.LINKEDIN_TOKEN_ACCOUNT8 || "",
     authorUrn: process.env.LINKEDIN_AUTHOR_URN_ACCOUNT8 || "",
-    courseName: "Precision Agriculture with IoT and Drones"
+    courseName: "Python for Data Science and AI"
   },
   account9: {
     accessToken: process.env.LINKEDIN_TOKEN_ACCOUNT9 || "",
@@ -70,11 +70,21 @@ export const linkedInAccounts: Record<string, LinkedInAccount> = {
     accessToken: process.env.LINKEDIN_TOKEN_ACCOUNT28 || "",
     authorUrn: process.env.LINKEDIN_AUTHOR_URN_ACCOUNT28 || "",
     courseName: "AI in Talent Acquisition and Recruitment"
+  },
+  account13: {
+    accessToken: process.env.LINKEDIN_TOKEN_ACCOUNT28 || "",
+    authorUrn: process.env.LINKEDIN_AUTHOR_URN_ACCOUNT28 || "",
+    courseName: "TypeScript Mastery: From Basics to Advanced Patterns"
+  },
+  account14: {
+    accessToken: process.env.LINKEDIN_TOKEN_ACCOUNT29 || "",
+    authorUrn: process.env.LINKEDIN_AUTHOR_URN_ACCOUNT29 || "",
+    courseName: "DevOps with Docker and Kubernetes"
+  },
+  account15: {
+    accessToken: process.env.LINKEDIN_TOKEN_ACCOUNT30 || "",
+    authorUrn: process.env.LINKEDIN_AUTHOR_URN_ACCOUNT30 || "",
+    courseName: "Machine Learning Engineering with Python"
   }
 };
 
-export const s3 = new AWS.S3({
-  accessKeyId: process.env.AWS_ACCESS_KEY!,
-  secretAccessKey: process.env.AWS_SECRET_KEY!,
-  region: process.env.AWS_REGION!,
-});
