@@ -1,8 +1,8 @@
 import fs from "fs";
 import path from "path";
-import { fetch } from "undici";
 import { exec } from "child_process";
 import { promisify } from "util";
+import Snoowrap from "snoowrap";
 
 const execAsync = promisify(exec);
 
@@ -10,6 +10,15 @@ const execAsync = promisify(exec);
 function sanitizeFileName(name: string): string {
   return name.replace(/[^a-z0-9]/gi, "_").toLowerCase().slice(0, 50);
 }
+
+// ✅ Initialize Snoowrap with your credentials
+const reddit = new Snoowrap({
+  userAgent: "reddit-bot/1.0",
+  clientId: process.env.REDDIT_CLIENT_ID!,
+  clientSecret: process.env.REDDIT_CLIENT_SECRET!,
+  username: process.env.REDDIT_USERNAME!,
+  password: process.env.REDDIT_PASSWORD!,
+});
 
 function getVideoInfo(post: any): { dashUrl: string; title: string } | null {
   if (post.is_video && post.media?.reddit_video?.dash_url) {
@@ -31,20 +40,11 @@ export async function fetchRedditVideo(
   try {
     console.log(`🎯 Selected subreddit: r/${subreddit}`);
 
-    const url = `https://www.reddit.com/r/${subreddit}/top.json?limit=20&t=day`;
-    const res = await fetch(url, {
-      headers: {
-        "User-Agent": "reddit-bot/1.0",
-        "Accept": "application/json",
-      },
-    });
+    // ✅ Fetch top 20 posts from Reddit using Snoowrap
+    const posts = await reddit.getSubreddit(subreddit).getTop({ time: "day", limit: 20 });
 
-    if (!res.ok)
-      throw new Error(`Failed to fetch subreddit: ${res.status} ${res.statusText}`);
-
-    const data: any = await res.json();
-    const videoPosts = data.data.children
-      .map((p: any) => getVideoInfo(p.data))
+    const videoPosts = posts
+      .map((p: any) => getVideoInfo(p))
       .filter(Boolean) as { dashUrl: string; title: string }[];
 
     if (videoPosts.length === 0) {
@@ -53,8 +53,7 @@ export async function fetchRedditVideo(
     }
 
     // ✅ Pick a random video
-    const { dashUrl, title } =
-      videoPosts[Math.floor(Math.random() * videoPosts.length)];
+    const { dashUrl, title } = videoPosts[Math.floor(Math.random() * videoPosts.length)];
 
     const safeName = sanitizeFileName(title);
     const finalFile = path.join(outputDir, `reddit_${safeName}.mp4`);
@@ -62,9 +61,7 @@ export async function fetchRedditVideo(
     console.log(`⬇ Downloading random video with audio: ${title}`);
 
     // ✅ Use ffmpeg to download + merge
-    await execAsync(
-      `ffmpeg -y -i "${dashUrl}" -c copy "${finalFile}"`
-    );
+    await execAsync(`ffmpeg -y -i "${dashUrl}" -c copy "${finalFile}"`);
 
     console.log(`✅ Final video with audio saved at ${finalFile}`);
     return { filePath: finalFile, fileName: path.basename(finalFile), title };
