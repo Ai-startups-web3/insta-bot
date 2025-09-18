@@ -1,19 +1,19 @@
-import fs from 'fs';
-import dotenv from 'dotenv';
-import { cropVideo } from './Helpers/VideoProcessing.js';
-import { startUploadSession } from './Helpers/upload.js';
-import config from './config.js';
-import { fetchRedditVideo } from './Helpers/redditDownloader.js';
+import fs from "fs";
+import dotenv from "dotenv";
+import { cropVideo } from "./Helpers/VideoProcessing.js";
+import { startUploadSession } from "./Helpers/upload.js";
+import config from "./config.js";
+import { fetchRedditVideo } from "./Helpers/redditDownloader.js";
 
 dotenv.config();
 
-const VIDEO_NUMBER_FILE = './videoNumber.json';
+const VIDEO_NUMBER_FILE = "./videoNumber.json";
 
 // Load video number from file
 const loadVideoNumber = (): number => {
   try {
     if (fs.existsSync(VIDEO_NUMBER_FILE)) {
-      const data = fs.readFileSync(VIDEO_NUMBER_FILE, 'utf-8');
+      const data = fs.readFileSync(VIDEO_NUMBER_FILE, "utf-8");
       return JSON.parse(data).videoNumber || 1;
     }
   } catch (error) {
@@ -21,7 +21,6 @@ const loadVideoNumber = (): number => {
   }
   return 1; // Default value
 };
-
 
 // Ensure output directory exists
 const ensureOutputDirExists = (outputDir: string) => {
@@ -35,7 +34,10 @@ const runUploadProcess = async (mediaType: string, botConfig: any) => {
 
   try {
     // ✅ Fetch Reddit video with title
-    const redditVideo = await fetchRedditVideo(botConfig.subreddit, botConfig.outputDir);
+    const redditVideo = await fetchRedditVideo(
+      botConfig.subreddit,
+      botConfig.outputDir
+    );
 
     if (!redditVideo) {
       console.log("⚠ No video to upload this round.");
@@ -48,11 +50,13 @@ const runUploadProcess = async (mediaType: string, botConfig: any) => {
     let hashtags = "";
     if (Array.isArray(botConfig.hashtags) && botConfig.hashtags.length > 0) {
       const shuffled = [...botConfig.hashtags].sort(() => 0.5 - Math.random());
-      // Pick 2–4 random hashtags (or all if fewer)
+
+      // ✅ Ensure at least 6 hashtags, max all available
       const count = Math.min(
-        Math.floor(Math.random() * 3) + 2, // 2–4 hashtags
+        Math.floor(Math.random() * 5) + 6, // 6–10 hashtags
         shuffled.length
       );
+
       hashtags = shuffled.slice(0, count).join(" ");
     }
 
@@ -88,10 +92,7 @@ const startBot = async (botId: number) => {
 
   await runUploadProcess("VIDEO", botConfig);
 
-
-
   setInterval(async () => {
-    
     console.log("⏳ Running scheduled upload...");
     await runUploadProcess("VIDEO", botConfig);
   }, 2 * 60 * 60 * 1000); // Every 2 hours
@@ -103,4 +104,7 @@ if (selectedBots.length === 0) {
   console.log("⚡ No specific bots selected. Running all bots...");
 }
 
-(selectedBots.length ? selectedBots : Object.keys(config.bots).map(Number)).forEach(startBot);
+(selectedBots.length
+  ? selectedBots
+  : Object.keys(config.bots).map(Number)
+).forEach(startBot);
