@@ -8,7 +8,7 @@
     "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "tsc && cp -r assets dist/",
+    "build": "tsc ",
     "start": "npm run build && node dist/sdk.js"
   },
   "dependencies": {
