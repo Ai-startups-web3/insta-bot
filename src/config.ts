@@ -15,21 +15,21 @@ export const linkedInAccounts: Record<string, LinkedInAccount> = {
     authorUrn: process.env.LINKEDIN_AUTHOR_URN_ACCOUNT1 || "",
     courseName: "AI in Healthcare: The Future of Medicine"
   },
-  account2: {
-    accessToken: process.env.LINKEDIN_TOKEN_ACCOUNT2 || "",
-    authorUrn: process.env.LINKEDIN_AUTHOR_URN_ACCOUNT2 || "",
-    courseName: "Quantum Computing for Beginners"
-  },
-  account3: {
-    accessToken: process.env.LINKEDIN_TOKEN_ACCOUNT3 || "",
-    authorUrn: process.env.LINKEDIN_AUTHOR_URN_ACCOUNT3 || "",
-    courseName: "Reactjs For advanced Developers"
-  },
-  account4: {
-    accessToken: process.env.LINKEDIN_TOKEN_ACCOUNT4 || "",
-    authorUrn: process.env.LINKEDIN_AUTHOR_URN_ACCOUNT4 || "",
-    courseName: "Blockchain in Agriculture and Food Security"
-  },
+  // account2: {
+  //   accessToken: process.env.LINKEDIN_TOKEN_ACCOUNT2 || "",
+  //   authorUrn: process.env.LINKEDIN_AUTHOR_URN_ACCOUNT2 || "",
+  //   courseName: "Quantum Computing for Beginners"
+  // },
+  // account3: {
+  //   accessToken: process.env.LINKEDIN_TOKEN_ACCOUNT3 || "",
+  //   authorUrn: process.env.LINKEDIN_AUTHOR_URN_ACCOUNT3 || "",
+  //   courseName: "Reactjs For advanced Developers"
+  // },
+  // account4: {
+  //   accessToken: process.env.LINKEDIN_TOKEN_ACCOUNT4 || "",
+  //   authorUrn: process.env.LINKEDIN_AUTHOR_URN_ACCOUNT4 || "",
+  //   courseName: "Blockchain in Agriculture and Food Security"
+  // },
   account5: {
     accessToken: process.env.LINKEDIN_TOKEN_ACCOUNT5 || "",
     authorUrn: process.env.LINKEDIN_AUTHOR_URN_ACCOUNT5 || "",
@@ -38,7 +38,7 @@ export const linkedInAccounts: Record<string, LinkedInAccount> = {
   account6: {
     accessToken: process.env.LINKEDIN_TOKEN_ACCOUNT6 || "",
     authorUrn: process.env.LINKEDIN_AUTHOR_URN_ACCOUNT6 || "",
-    courseName: "Nextjs"
+    courseName: "Reactjs For advanced Developers"
   },
   account7: {
     accessToken: process.env.LINKEDIN_TOKEN_ACCOUNT7 || "",
