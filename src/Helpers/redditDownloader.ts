@@ -41,7 +41,7 @@ export async function fetchRedditVideo(
     console.log(`🎯 Selected subreddit: r/${subreddit}`);
 
     // ✅ Fetch top 20 posts from Reddit using Snoowrap
-    const posts = await reddit.getSubreddit(subreddit).getTop({ time: "day", limit: 20 });
+    const posts = await reddit.getSubreddit(subreddit).getTop({ time: "day", limit: 200 });
 
     const videoPosts = posts
       .map((p: any) => getVideoInfo(p))
