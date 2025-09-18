@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import { cropVideo } from './Helpers/VideoProcessing.js';
 import { startUploadSession } from './Helpers/upload.js';
 import config from './config.js';
+import { fetchRedditVideo } from './Helpers/redditDownloader.js';
 
 dotenv.config();
 
@@ -21,14 +22,6 @@ const loadVideoNumber = (): number => {
   return 1; // Default value
 };
 
-// Save video number to file
-const saveVideoNumber = (videoNumber: number) => {
-  try {
-    fs.writeFileSync(VIDEO_NUMBER_FILE, JSON.stringify({ videoNumber }, null, 2), 'utf-8');
-  } catch (error) {
-    console.error("⚠ Error saving video number:", error);
-  }
-};
 
 // Ensure output directory exists
 const ensureOutputDirExists = (outputDir: string) => {
@@ -37,50 +30,44 @@ const ensureOutputDirExists = (outputDir: string) => {
   }
 };
 
-// Handles video upload and retries on failure
-const runUploadProcess = async (mediaType: string, botConfig: any, retryCount = 0) => {
-  botConfig.videoNumber = loadVideoNumber(); // Load before upload
-  console.log(`🔄 Upload process started for ${mediaType} | Video Number: ${botConfig.videoNumber}`);
+const runUploadProcess = async (mediaType: string, botConfig: any) => {
+  console.log(`🔄 Upload process started for ${mediaType}`);
 
   try {
-    // Process the video
-    await cropVideo(
-      botConfig.inputVideo,
-      botConfig.outputDir,
-      botConfig.beepAudio,
-      botConfig.videoNumber,
-      botConfig.videoDuration,
-      botConfig.episode,
-      botConfig.textOnVideo
-    );
+    // ✅ Fetch Reddit video with title
+    const redditVideo = await fetchRedditVideo(botConfig.subreddit, botConfig.outputDir);
 
-    console.log("🎬 Video Cropped");
-    const currentDate = new Date().toLocaleDateString('en-US', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
-    // Upload video
-    const coverUrl = "";
-    const thumbOffset = "";
+    if (!redditVideo) {
+      console.log("⚠ No video to upload this round.");
+      return;
+    }
+
+    console.log(`🎬 Reddit video downloaded: ${redditVideo.fileName}`);
+
+    // ✅ Randomly select hashtags
+    let hashtags = "";
+    if (Array.isArray(botConfig.hashtags) && botConfig.hashtags.length > 0) {
+      const shuffled = [...botConfig.hashtags].sort(() => 0.5 - Math.random());
+      // Pick 2–4 random hashtags (or all if fewer)
+      const count = Math.min(
+        Math.floor(Math.random() * 3) + 2, // 2–4 hashtags
+        shuffled.length
+      );
+      hashtags = shuffled.slice(0, count).join(" ");
+    }
+
+    // ✅ Use config caption + Reddit title + random hashtags
+    const caption = `${redditVideo.title}\n\n${botConfig.caption} ${hashtags}`;
+
     await startUploadSession(
       botConfig.accessToken,
       botConfig.outputDir,
-      botConfig.videoNumber,
-      mediaType="VIDEO",
-      `${botConfig.caption}\n\n Video Posted on ${currentDate}\n${botConfig.hashtags}`, 
-      botConfig.hashtags,
-      coverUrl,
-      thumbOffset,
-      botConfig.location
+      redditVideo.fileName,
+      (mediaType = "VIDEO"),
+      caption
     );
 
     console.log("✅ Upload completed successfully");
-
-    // Increment video number and save
-    botConfig.videoNumber++;
-    saveVideoNumber(botConfig.videoNumber);
   } catch (error) {
     console.error(`❌ Error uploading ${mediaType}:`, error);
   }
@@ -96,22 +83,15 @@ const startBot = async (botId: number) => {
   }
 
   const botConfig = bot.videoConfig;
-  ensureOutputDirExists(botConfig.inputVideo);
   ensureOutputDirExists(botConfig.outputDir);
   console.log(`🚀 Starting ${bot.name} | Video Number: ${loadVideoNumber()}`);
 
   await runUploadProcess("VIDEO", botConfig);
 
-  if (botConfig.isPaused) {
-    console.log("⏸ Bot is paused. Skipping scheduled upload.");
-    return;
-  }
+
 
   setInterval(async () => {
-    if (botConfig.isPaused) {
-      console.log("⏸ Bot is still paused. Skipping upload.");
-      return;
-    }
+    
     console.log("⏳ Running scheduled upload...");
     await runUploadProcess("VIDEO", botConfig);
   }, 2 * 60 * 60 * 1000); // Every 2 hours

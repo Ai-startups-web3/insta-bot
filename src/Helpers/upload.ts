@@ -94,15 +94,9 @@ const publishInstagramMedia = async (igId: string, creationId: string, accessTok
 
 // Function to get file path for both reels (videos) and photos (images)
 const getFilePath = (folderName: string, mediaName: string, mediaType: 'VIDEO' | 'IMAGE'): string => {
-  const extension = mediaType === 'VIDEO' ? '.mp4' : '.png';
-  return path.join(`${folderName}/${mediaName}${extension}`);
+  return path.join(`${folderName}/${mediaName}`);
 };
 
-// Function to get file URL for media
-const getFileUrl = (mediaName: string, folderName: string, mediaType: 'VIDEO' | 'IMAGE', serverUrl: string): string => {
-  const extension = mediaType === 'VIDEO' ? '.mp4' : '.png';
-  return `${serverUrl}/media/${folderName}/${mediaName}${extension}`;
-};
 
 // Upload session handler
 const startUploadSession = async (
