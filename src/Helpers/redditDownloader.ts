@@ -51,7 +51,7 @@ export async function fetchRedditVideo(
 
     // ✅ Fetch top 50 posts from the day using Snoowrap
     const posts = await reddit.getSubreddit(subreddit).getTop({ time: "day", limit: 50 });
-    
+
     const videoPosts = posts
       .map((p: any) => getVideoInfoFromPost(p))
       .filter(Boolean) as VideoInfo[];
@@ -68,8 +68,9 @@ export async function fetchRedditVideo(
 
     console.log(`⬇ Downloading random video with audio: ${title}`);
 
-    // ✅ Download + merge video with ffmpeg
-    await execAsync(`ffmpeg -y -i "${url}" -c copy "${finalFile}"`);
+    // ✅ Download + merge video with yt-dlp (more stable than ffmpeg for Reddit URLs)
+    // Make sure yt-dlp is installed: `pip3 install yt-dlp`
+    await execAsync(`yt-dlp -f best -o "${finalFile}" "${url}"`);
 
     console.log(`✅ Final video with audio saved at ${finalFile}`);
     return { filePath: finalFile, fileName: path.basename(finalFile), title };
