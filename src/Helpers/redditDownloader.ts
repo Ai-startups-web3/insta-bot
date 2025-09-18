@@ -1,8 +1,12 @@
+// fetchRedditVideo.ts
 import fs from "fs";
 import path from "path";
-import { fetch } from "undici";
 import { exec } from "child_process";
 import { promisify } from "util";
+import dotenv from "dotenv";
+import Snoowrap from "snoowrap";
+
+dotenv.config();
 
 const execAsync = promisify(exec);
 
@@ -11,14 +15,28 @@ function sanitizeFileName(name: string): string {
   return name.replace(/[^a-z0-9]/gi, "_").toLowerCase().slice(0, 50);
 }
 
-function getVideoInfo(post: any): { dashUrl: string; title: string } | null {
-  if (post.is_video && post.media?.reddit_video?.dash_url) {
-    return { dashUrl: post.media.reddit_video.dash_url, title: post.title };
+// ✅ Initialize Reddit API client using your script credentials
+const reddit = new Snoowrap({
+  userAgent: "reddit-bot/1.0",
+  clientId: process.env.REDDIT_CLIENT_ID!,
+  clientSecret: process.env.REDDIT_CLIENT_SECRET!,
+  username: process.env.REDDIT_USERNAME!,
+  password: process.env.REDDIT_PASSWORD!,
+});
+
+interface VideoInfo {
+  url: string;
+  title: string;
+}
+
+function getVideoInfoFromPost(post: any): VideoInfo | null {
+  if (post.is_video && post.media?.reddit_video?.fallback_url) {
+    return { url: post.media.reddit_video.fallback_url, title: post.title };
   }
   if (post.crosspost_parent_list?.length) {
     const cross = post.crosspost_parent_list[0];
-    if (cross.is_video && cross.media?.reddit_video?.dash_url) {
-      return { dashUrl: cross.media.reddit_video.dash_url, title: cross.title };
+    if (cross.is_video && cross.media?.reddit_video?.fallback_url) {
+      return { url: cross.media.reddit_video.fallback_url, title: cross.title };
     }
   }
   return null;
@@ -31,41 +49,27 @@ export async function fetchRedditVideo(
   try {
     console.log(`🎯 Selected subreddit: r/${subreddit}`);
 
-    // ✅ Fetch top 50 posts from the day
-    const url = `https://www.reddit.com/r/${subreddit}/top.json?limit=50&t=day`;
-    const res = await fetch(url, {
-      headers: {
-       "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-    "Accept": "application/json",
-      },
-    });
-
-    if (!res.ok)
-      throw new Error(`Failed to fetch subreddit: ${res.status} ${res.statusText}`);
-
-    const data: any = await res.json();
-    const videoPosts = data.data.children
-      .map((p: any) => getVideoInfo(p.data))
-      .filter(Boolean) as { dashUrl: string; title: string }[];
+    // ✅ Fetch top 50 posts from the day using Snoowrap
+    const posts = await reddit.getSubreddit(subreddit).getTop({ time: "day", limit: 50 });
+    
+    const videoPosts = posts
+      .map((p: any) => getVideoInfoFromPost(p))
+      .filter(Boolean) as VideoInfo[];
 
     if (videoPosts.length === 0) {
       console.log(`⚠ No Reddit-hosted video found in r/${subreddit}`);
       return null;
     }
 
-    // ✅ Pick a random video out of the top 50
-    const { dashUrl, title } =
-      videoPosts[Math.floor(Math.random() * videoPosts.length)];
-
+    // ✅ Pick a random video
+    const { url, title } = videoPosts[Math.floor(Math.random() * videoPosts.length)];
     const safeName = sanitizeFileName(title);
     const finalFile = path.join(outputDir, `reddit_${safeName}.mp4`);
 
     console.log(`⬇ Downloading random video with audio: ${title}`);
 
-    // ✅ Use ffmpeg to download + merge
-    await execAsync(
-      `ffmpeg -y -i "${dashUrl}" -c copy "${finalFile}"`
-    );
+    // ✅ Download + merge video with ffmpeg
+    await execAsync(`ffmpeg -y -i "${url}" -c copy "${finalFile}"`);
 
     console.log(`✅ Final video with audio saved at ${finalFile}`);
     return { filePath: finalFile, fileName: path.basename(finalFile), title };
