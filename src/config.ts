@@ -72,18 +72,18 @@ export const linkedInAccounts: Record<string, LinkedInAccount> = {
     courseName: "AI in Talent Acquisition and Recruitment"
   },
   account13: {
-    accessToken: process.env.LINKEDIN_TOKEN_ACCOUNT28 || "",
-    authorUrn: process.env.LINKEDIN_AUTHOR_URN_ACCOUNT28 || "",
+    accessToken: process.env.LINKEDIN_TOKEN_ACCOUNT13 || "",
+    authorUrn: process.env.LINKEDIN_AUTHOR_URN_ACCOUNT13 || "",
     courseName: "TypeScript Mastery: From Basics to Advanced Patterns"
   },
   account14: {
-    accessToken: process.env.LINKEDIN_TOKEN_ACCOUNT29 || "",
-    authorUrn: process.env.LINKEDIN_AUTHOR_URN_ACCOUNT29 || "",
+    accessToken: process.env.LINKEDIN_TOKEN_ACCOUNT14 || "",
+    authorUrn: process.env.LINKEDIN_AUTHOR_URN_ACCOUNT14 || "",
     courseName: "DevOps with Docker and Kubernetes"
   },
   account15: {
-    accessToken: process.env.LINKEDIN_TOKEN_ACCOUNT30 || "",
-    authorUrn: process.env.LINKEDIN_AUTHOR_URN_ACCOUNT30 || "",
+    accessToken: process.env.LINKEDIN_TOKEN_ACCOUNT15 || "",
+    authorUrn: process.env.LINKEDIN_AUTHOR_URN_ACCOUNT15 || "",
     courseName: "Machine Learning Engineering with Python"
   }
 };
