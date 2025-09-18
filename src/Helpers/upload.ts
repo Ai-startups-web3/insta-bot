@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { uploadFileToS3 } from './UrlGenerator.js';
 import path from 'path';
+import fs from 'fs';
 
 
 // Type definitions for Instagram user details
@@ -128,7 +129,7 @@ const startUploadSession = async (
 
     // Publish the media
     if (creationId) {
-      await tryPublishInstagramMedia(igId, creationId, accessToken);
+      await tryPublishInstagramMedia(igId, creationId, accessToken,filePath);
     } else {
       console.error('Failed to obtain creationId, cannot publish media.');
     }
@@ -167,11 +168,24 @@ const wait = (ms: number): Promise<void> => {
 };
 
 // Function to publish Instagram media with retries
-const tryPublishInstagramMedia = async (igId: string, creationId: string, accessToken: string) => {
+const tryPublishInstagramMedia = async (igId: string, creationId: string, accessToken: string,filePath:string) => {
   try {
     await checkMediaStatus(creationId, accessToken);
     await publishInstagramMedia(igId, creationId, accessToken);
     console.log('Media published successfully.');
+      if (filePath) {
+      try {
+        fs.unlink(filePath, (err) => {
+          if (err) {
+            console.error(`Failed to delete file ${filePath}:`, err);
+          } else {
+            console.log(`Deleted local file: ${filePath}`);
+          }
+        });
+      } catch (err) {
+        console.error(`Failed to delete file ${filePath}:`, err);
+      }
+    }
   } catch (error) {
     console.error('Error publishing media:', error);
   }
