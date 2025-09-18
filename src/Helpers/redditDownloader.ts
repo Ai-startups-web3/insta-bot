@@ -35,8 +35,8 @@ export async function fetchRedditVideo(
     const url = `https://www.reddit.com/r/${subreddit}/top.json?limit=50&t=day`;
     const res = await fetch(url, {
       headers: {
-        "User-Agent": "reddit-bot/1.0",
-        "Accept": "application/json",
+       "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "Accept": "application/json",
       },
     });
 
