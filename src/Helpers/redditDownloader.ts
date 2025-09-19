@@ -11,7 +11,7 @@ function sanitizeFileName(name: string): string {
   return name.replace(/[^a-z0-9]/gi, "_").toLowerCase().slice(0, 50);
 }
 
-// ✅ Initialize Snoowrap with your credentials
+// ✅ Initialize Snoowrap
 const reddit = new Snoowrap({
   userAgent: "reddit-bot/1.0",
   clientId: process.env.REDDIT_CLIENT_ID!,
@@ -34,39 +34,66 @@ function getVideoInfo(post: any): { dashUrl: string; title: string } | null {
 }
 
 export async function fetchRedditVideo(
-  subreddit: string,
+  source: string, // can be r/... or t/...
   outputDir: string
 ): Promise<{ filePath: string; fileName: string; title: string } | null> {
   try {
-    console.log(`🎯 Selected subreddit: r/${subreddit}`);
+    let videoPosts: { dashUrl: string; title: string }[] = [];
 
-    // ✅ Fetch top 20 posts from Reddit using Snoowrap
-    const posts = await reddit.getSubreddit(subreddit).getTop({ time: "day", limit: 200 });
+    if (source.startsWith("r/")) {
+      // ✅ Subreddit path
+      const subName = source.replace("r/", "");
+      console.log(`🎯 Fetching from subreddit: r/${subName}`);
 
-    const videoPosts = posts
-      .map((p: any) => getVideoInfo(p))
-      .filter(Boolean) as { dashUrl: string; title: string }[];
+      const posts = await reddit.getSubreddit(subName).getTop({
+        time: "day",
+        limit: 200,
+      });
+
+      videoPosts = posts
+        .map((p: any) => getVideoInfo(p))
+        .filter(Boolean) as { dashUrl: string; title: string }[];
+    } else if (source.startsWith("t/")) {
+      // ✅ Topic path (search instead of JSON API)
+      const topic = source.replace("t/", "").replace(/\/$/, "");
+      console.log(`🎯 Searching posts for topic: ${topic}`);
+
+      const posts = await reddit.search({
+        query: topic,
+        sort: "top",
+        time: "day",
+        limit: 100,
+      });
+
+      videoPosts = posts
+        .map((p: any) => getVideoInfo(p))
+        .filter(Boolean) as { dashUrl: string; title: string }[];
+    } else {
+      throw new Error("Source must start with r/ or t/");
+    }
 
     if (videoPosts.length === 0) {
-      console.log(`⚠ No Reddit-hosted video found in r/${subreddit}`);
+      console.log(`⚠ No Reddit-hosted video found in ${source}`);
       return null;
     }
 
-    // ✅ Pick a random video
-    const { dashUrl, title } = videoPosts[Math.floor(Math.random() * videoPosts.length)];
-
+    // 🎲 Pick random video
+    const { dashUrl, title } =
+      videoPosts[Math.floor(Math.random() * videoPosts.length)];
     const safeName = sanitizeFileName(title);
     const finalFile = path.join(outputDir, `reddit_${safeName}.mp4`);
 
     console.log(`⬇ Downloading random video with audio: ${title}`);
-
-    // ✅ Use ffmpeg to download + merge
     await execAsync(`ffmpeg -y -i "${dashUrl}" -c copy "${finalFile}"`);
 
     console.log(`✅ Final video with audio saved at ${finalFile}`);
-    return { filePath: finalFile, fileName: path.basename(finalFile), title };
+    return {
+      filePath: finalFile,
+      fileName: path.basename(finalFile),
+      title,
+    };
   } catch (err: any) {
-    console.error("❌ Reddit video fetch error:", err.message);
+    console.error("❌ Reddit video fetch error:", source, err.message);
     return null;
   }
 }
